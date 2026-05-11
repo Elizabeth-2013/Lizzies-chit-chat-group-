@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lexus Cheat Chat Group</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px 20px;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .button-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .button-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .button-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .button-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        /* Chat Screen */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+            background: #f5f5f5;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header h2 {
+            font-size: 16px;
+        }
+
+        .chat-header p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .exit-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .exit-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 15px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.own {
+            justify-content: flex-end;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 12px 15px;
+            border-radius: 15px;
+            word-wrap: break-word;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .message.own .message-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 0;
+        }
+
+        .message.other .message-bubble {
+            background: white;
+            color: #333;
+            border-bottom-left-radius: 0;
+        }
+
+        .message-name {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+        .message.own .message-name {
+            color: #667eea;
+            text-align: right;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .message.own .message-time {
+            text-align: right;
+        }
+
+        .input-area {
+            padding: 15px 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .input-area input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .online-users {
+            padding: 15px 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            font-size: 12px;
+            color: #666;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .online-users strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .user-tag {
+            display: inline-block;
+            background: #f0f0f0;
+            padding: 5px 10px;
+            border-radius: 20px;
+            margin-right: 8px;
+            margin-bottom: 5px;
+            font-size: 11px;
+        }
+
+        .user-tag.online::before {
+            content: "● ";
+            color: #4caf50;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .info-box strong {
+            color: #667eea;
+        }
+
+        .group-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .group-options button {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #333;
+            transition: all 0.3s;
+        }
+
+        .group-options button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .group-options button:hover {
+            border-color: #667eea;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Welcome Screen -->
+        <div class="screen active" id="welcomeScreen">
+            <div class="header">
+                <h1>🚗 Lexus Cheat Chat</h1>
+                <p>Group Chat App</p>
+            </div>
+            <div class="content">
+                <div class="info-box">
+                    <strong>How it works:</strong><br>
+                    Enter your name and choose a group to join. Chat with everyone in real-time!
+                </div>
+
+                <div class="form-group">
+                    <label>Your Name</label>
+                    <input type="text" id="userName" placeholder="Enter the name people will see" maxlength="20">
+                </div>
+
+                <div class="form-group">
+                    <label>Select Group</label>
+                    <select id="groupSelect">
+                        <option value="">Choose a group...</option>
+                        <option value="General">General Chat</option>
+                        <option value="Friends">Friends Only</option>
+                        <option value="Work">Work Team</option>
+                        <option value="Gaming">Gaming Squad</option>
+                        <option value="Random">Random Talk</option>
+                    </select>
+                </div>
+
+                <button class="button button-primary" onclick="joinGroup()">Enter Group</button>
+            </div>
+        </div>
+
+        <!-- Chat Screen -->
+        <div class="screen" id="chatScreen">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <div>
+                        <h2 id="groupName">Group</h2>
+                        <p id="userInfo">You: Your Name</p>
+                    </div>
+                    <button class="exit-btn" onclick="exitGroup()">Leave</button>
+                </div>
+
+                <div class="online-users" id="onlineUsers">
+                    <strong>Online Members:</strong>
+                    <div id="membersList"></div>
+                </div>
+
+                <div class="messages" id="messagesContainer">
+                    <div class="empty-state">No messages yet. Start the conversation! 💬</div>
+                </div>
+
+                <div class="input-area">
+                    <input type="text" id="messageInput" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
+                    <button class="send-btn" onclick="sendMessage()">➤</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store all messages in memory
+        const allMessages = {
+            'General': [],
+            'Friends': [],
+            'Work': [],
+            'Gaming': [],
+            'Random': []
+        };
+
+        // Store online users
+        const onlineUsers = {
+            'General': [],
+            'Friends': [],
+            'Work': [],
+            'Gaming': [],
+            'Random': []
+        };
+
+        let currentUser = '';
+        let currentGroup = '';
+
+        function joinGroup() {
+            const userName = document.getElementById('userName').value.trim();
+            const groupSelect = document.getElementById('groupSelect').value;
+
+            if (!userName) {
+                alert('Please enter your name!');
+                return;
+            }
+
+            if (!groupSelect) {
+                alert('Please select a group!');
+                return;
+            }
+
+            currentUser = userName;
+            currentGroup = groupSelect;
+
+            // Add user to online list
+            if (!onlineUsers[currentGroup].includes(currentUser)) {
+                onlineUsers[currentGroup].push(currentUser);
+            }
+
+            // Show chat screen
+            document.getElementById('welcomeScreen').classList.remove('active');
+            document.getElementById('chatScreen').classList.add('active');
+
+            // Update header
+            document.getElementById('groupName').textContent = currentGroup + ' Chat';
+            document.getElementById('userInfo').textContent = 'You: ' + currentUser;
+
+            // Add join message
+            addSystemMessage(currentUser + ' joined the group! 👋');
+
+            // Refresh display
+            updateMembersList();
+            loadMessages();
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const messageText = messageInput.value.trim();
+
+            if (!messageText) return;
+
+            const message = {
+                user: currentUser,
+                text: messageText,
+                time: new Date(),
+                id: Date.now()
+            };
+
+            allMessages[currentGroup].push(message);
+            messageInput.value = '';
+
+            // Focus back to input
+            messageInput.focus();
+
+            loadMessages();
+        }
+
+        function addSystemMessage(text) {
+            const message = {
+                user: 'System',
+                text: text,
+                time: new Date(),
+                id: Date.now(),
+                isSystem: true
+            };
+            allMessages[currentGroup].push(message);
+        }
+
+        function loadMessages() {
+            const messagesContainer = document.getElementById('messagesContainer');
+            const messages = allMessages[currentGroup];
+
+            if (messages.length === 0) {
+                messagesContainer.innerHTML = '<div class="empty-state">No messages yet. Start the conversation! 💬</div>';
+                return;
+            }
+
+            messagesContainer.innerHTML = messages.map(msg => {
+                const isOwn = msg.user === currentUser;
+                const isSystem = msg.isSystem;
+                const hours = msg.time.getHours().toString().padStart(2, '0');
+                const mins = msg.time.getMinutes().toString().padStart(2, '0');
+
+                if (isSystem) {
+                    return `
+                        <div style="text-align: center; color: #999; font-size: 11px; margin: 10px 0;">
+                            <em>${msg.text}</em>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="message ${isOwn ? 'own' : 'other'}">
+                        <div>
+                            <div class="message-name">${msg.user}</div>
+                            <div class="message-bubble">
+                                ${msg.text}
+                                <div class="message-time">${hours}:${mins}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Scroll to bottom
+            setTimeout(() => {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, 10);
+        }
+
+        function updateMembersList() {
+            const membersList = document.getElementById('membersList');
+            const members = onlineUsers[currentGroup];
+
+            if (members.length === 0) {
+                membersList.innerHTML = '<div class="user-tag">No one online</div>';
+                return;
+            }
+
+            membersList.innerHTML = members.map(member => 
+                `<span class="user-tag online">${member}</span>`
+            ).join('');
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function exitGroup() {
+            // Remove user from online list
+            onlineUsers[currentGroup] = onlineUsers[currentGroup].filter(u => u !== currentUser);
+
+            // Add leave message
+            addSystemMessage(currentUser + ' left the group 👋');
+
+            // Go back to welcome
+            document.getElementById('chatScreen').classList.remove('active');
+            document.getElementById('welcomeScreen').classList.add('active');
+
+            // Clear inputs
+            document.getElementById('userName').value = '';
+            document.getElementById('groupSelect').value = '';
+            document.getElementById('messageInput').value = '';
+
+            currentUser = '';
+            currentGroup = '';
+        }
+
+        // Simulate real-time updates
+        setInterval(() => {
+            if (currentGroup) {
+                updateMembersList();
+                loadMessages();
+            }
+        }, 500);
+    </script>
+</body>
+</html>
