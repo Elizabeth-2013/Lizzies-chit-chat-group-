@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lexus Cheat Chat Group</title>
+    <title>Lizzie's Chat Group</title>
     <style>
         * {
             margin: 0;
@@ -88,6 +88,13 @@
             border-color: #667eea;
         }
 
+        .form-group small {
+            display: block;
+            color: #999;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
         .button {
             width: 100%;
             padding: 12px;
@@ -108,6 +115,12 @@
         .button-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .button-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .button-secondary {
@@ -160,6 +173,38 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
+        .online-users {
+            padding: 12px 20px;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 12px;
+            color: #666;
+            max-height: 80px;
+            overflow-y: auto;
+        }
+
+        .online-users strong {
+            display: block;
+            margin-bottom: 6px;
+            color: #333;
+        }
+
+        .user-tag {
+            display: inline-block;
+            background: #f0f0f0;
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-right: 6px;
+            margin-bottom: 4px;
+            font-size: 11px;
+        }
+
+        .user-tag.online::before {
+            content: "● ";
+            color: #4caf50;
+            font-weight: bold;
+        }
+
         .messages {
             flex: 1;
             overflow-y: auto;
@@ -171,7 +216,7 @@
 
         .message {
             display: flex;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             animation: slideIn 0.3s ease-out;
         }
 
@@ -196,6 +241,7 @@
             border-radius: 15px;
             word-wrap: break-word;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            word-break: break-word;
         }
 
         .message.own .message-bubble {
@@ -230,6 +276,53 @@
 
         .message.own .message-time {
             text-align: right;
+        }
+
+        .system-message {
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+            margin: 15px 0;
+            font-style: italic;
+        }
+
+        .typing-indicator {
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+            padding: 10px;
+            font-style: italic;
+        }
+
+        .typing-indicator span {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #999;
+            margin: 0 2px;
+            animation: bounce 1.4s infinite;
+        }
+
+        .typing-indicator span:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
         }
 
         .input-area {
@@ -273,35 +366,8 @@
             transform: scale(1.05);
         }
 
-        .online-users {
-            padding: 15px 20px;
-            background: white;
-            border-top: 1px solid #e0e0e0;
-            font-size: 12px;
-            color: #666;
-            max-height: 100px;
-            overflow-y: auto;
-        }
-
-        .online-users strong {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-        }
-
-        .user-tag {
-            display: inline-block;
-            background: #f0f0f0;
-            padding: 5px 10px;
-            border-radius: 20px;
-            margin-right: 8px;
-            margin-bottom: 5px;
-            font-size: 11px;
-        }
-
-        .user-tag.online::before {
-            content: "● ";
-            color: #4caf50;
+        .send-btn:active {
+            transform: scale(0.95);
         }
 
         .info-box {
@@ -318,39 +384,27 @@
             color: #667eea;
         }
 
-        .group-options {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .group-options button {
-            flex: 1;
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            background: white;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            color: #333;
-            transition: all 0.3s;
-        }
-
-        .group-options button.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-color: transparent;
-        }
-
-        .group-options button:hover {
-            border-color: #667eea;
-        }
-
         .empty-state {
             text-align: center;
             color: #999;
             padding: 20px;
             font-size: 14px;
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            display: none;
+            border-left: 4px solid #c62828;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
         }
     </style>
 </head>
@@ -359,18 +413,21 @@
         <!-- Welcome Screen -->
         <div class="screen active" id="welcomeScreen">
             <div class="header">
-                <h1>🚗 Lexus Cheat Chat</h1>
-                <p>Group Chat App</p>
+                <h1>💬 Lizzie's Chat</h1>
+                <p>Real-time Group Chat Application</p>
             </div>
             <div class="content">
+                <div class="error-message" id="welcomeError"></div>
+
                 <div class="info-box">
                     <strong>How it works:</strong><br>
-                    Enter your name and choose a group to join. Chat with everyone in real-time!
+                    Enter your name, choose a group, and start chatting in real-time!
                 </div>
 
                 <div class="form-group">
                     <label>Your Name</label>
-                    <input type="text" id="userName" placeholder="Enter the name people will see" maxlength="20">
+                    <input type="text" id="userName" placeholder="Enter your name" maxlength="20" autocomplete="off">
+                    <small>1-20 characters</small>
                 </div>
 
                 <div class="form-group">
@@ -385,7 +442,7 @@
                     </select>
                 </div>
 
-                <button class="button button-primary" onclick="joinGroup()">Enter Group</button>
+                <button class="button button-primary" id="joinBtn" onclick="joinGroup()">Enter Group</button>
             </div>
         </div>
 
@@ -410,15 +467,35 @@
                 </div>
 
                 <div class="input-area">
-                    <input type="text" id="messageInput" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
-                    <button class="send-btn" onclick="sendMessage()">➤</button>
+                    <input 
+                        type="text" 
+                        id="messageInput" 
+                        placeholder="Type a message..." 
+                        maxlength="500"
+                        onkeypress="handleKeyPress(event)"
+                        oninput="handleTyping()">
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Send message (Enter)">➤</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Store all messages in memory
+        // ============= CONSTANTS =============
+        const GROUPS = {
+            GENERAL: 'General',
+            FRIENDS: 'Friends',
+            WORK: 'Work',
+            GAMING: 'Gaming',
+            RANDOM: 'Random'
+        };
+
+        const MESSAGE_TYPES = {
+            USER: 'user',
+            SYSTEM: 'system'
+        };
+
+        // ============= STATE MANAGEMENT =============
         const allMessages = {
             'General': [],
             'Friends': [],
@@ -427,76 +504,143 @@
             'Random': []
         };
 
-        // Store online users
         const onlineUsers = {
-            'General': [],
-            'Friends': [],
-            'Work': [],
-            'Gaming': [],
-            'Random': []
+            'General': new Set(),
+            'Friends': new Set(),
+            'Work': new Set(),
+            'Gaming': new Set(),
+            'Random': new Set()
+        };
+
+        const typingUsers = {
+            'General': new Set(),
+            'Friends': new Set(),
+            'Work': new Set(),
+            'Gaming': new Set(),
+            'Random': new Set()
         };
 
         let currentUser = '';
         let currentGroup = '';
+        let typingTimeout = null;
 
+        // ============= VALIDATION FUNCTIONS =============
+        function validateInput(input, minLength = 1, maxLength = 20) {
+            const trimmed = input.trim();
+            return trimmed.length >= minLength && trimmed.length <= maxLength;
+        }
+
+        function sanitizeInput(input) {
+            const div = document.createElement('div');
+            div.textContent = input.trim();
+            return div.innerHTML;
+        }
+
+        function showError(message, screen = 'welcome') {
+            const errorElement = document.getElementById(screen === 'welcome' ? 'welcomeError' : 'chatError');
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.classList.add('show');
+                setTimeout(() => {
+                    errorElement.classList.remove('show');
+                }, 5000);
+            }
+        }
+
+        // ============= GROUP MANAGEMENT =============
         function joinGroup() {
-            const userName = document.getElementById('userName').value.trim();
+            const userName = document.getElementById('userName').value;
             const groupSelect = document.getElementById('groupSelect').value;
 
-            if (!userName) {
-                alert('Please enter your name!');
+            // Validation
+            if (!validateInput(userName, 1, 20)) {
+                showError('Name must be 1-20 characters!');
                 return;
             }
 
             if (!groupSelect) {
-                alert('Please select a group!');
+                showError('Please select a group!');
                 return;
             }
 
-            currentUser = userName;
+            currentUser = sanitizeInput(userName);
             currentGroup = groupSelect;
 
             // Add user to online list
-            if (!onlineUsers[currentGroup].includes(currentUser)) {
-                onlineUsers[currentGroup].push(currentUser);
-            }
+            onlineUsers[currentGroup].add(currentUser);
 
-            // Show chat screen
+            // Switch screens
             document.getElementById('welcomeScreen').classList.remove('active');
             document.getElementById('chatScreen').classList.add('active');
 
-            // Update header
+            // Update UI
             document.getElementById('groupName').textContent = currentGroup + ' Chat';
             document.getElementById('userInfo').textContent = 'You: ' + currentUser;
 
-            // Add join message
+            // Add system message
             addSystemMessage(currentUser + ' joined the group! 👋');
 
-            // Refresh display
+            // Load data
             updateMembersList();
             loadMessages();
+
+            // Focus input
+            document.getElementById('messageInput').focus();
         }
 
+        function exitGroup() {
+            // Remove user from online list
+            onlineUsers[currentGroup].delete(currentUser);
+            typingUsers[currentGroup].delete(currentUser);
+
+            // Add leave message
+            addSystemMessage(currentUser + ' left the group 👋');
+
+            // Switch screens
+            document.getElementById('chatScreen').classList.remove('active');
+            document.getElementById('welcomeScreen').classList.add('active');
+
+            // Clear inputs
+            document.getElementById('userName').value = '';
+            document.getElementById('groupSelect').value = '';
+            document.getElementById('messageInput').value = '';
+
+            currentUser = '';
+            currentGroup = '';
+        }
+
+        // ============= MESSAGE MANAGEMENT =============
         function sendMessage() {
             const messageInput = document.getElementById('messageInput');
             const messageText = messageInput.value.trim();
 
             if (!messageText) return;
 
+            if (messageText.length > 500) {
+                showError('Message is too long (max 500 characters)');
+                return;
+            }
+
             const message = {
                 user: currentUser,
-                text: messageText,
+                text: sanitizeInput(messageText),
                 time: new Date(),
-                id: Date.now()
+                id: Date.now(),
+                type: MESSAGE_TYPES.USER
             };
 
             allMessages[currentGroup].push(message);
             messageInput.value = '';
 
-            // Focus back to input
+            // Remove typing indicator
+            typingUsers[currentGroup].delete(currentUser);
+
+            // Refresh UI
+            loadMessages();
             messageInput.focus();
 
-            loadMessages();
+            // Save to localStorage
+            saveToLocalStorage();
         }
 
         function addSystemMessage(text) {
@@ -505,9 +649,10 @@
                 text: text,
                 time: new Date(),
                 id: Date.now(),
-                isSystem: true
+                type: MESSAGE_TYPES.SYSTEM
             };
             allMessages[currentGroup].push(message);
+            saveToLocalStorage();
         }
 
         function loadMessages() {
@@ -521,17 +666,13 @@
 
             messagesContainer.innerHTML = messages.map(msg => {
                 const isOwn = msg.user === currentUser;
-                const isSystem = msg.isSystem;
+
+                if (msg.type === MESSAGE_TYPES.SYSTEM) {
+                    return `<div class="system-message">${msg.text}</div>`;
+                }
+
                 const hours = msg.time.getHours().toString().padStart(2, '0');
                 const mins = msg.time.getMinutes().toString().padStart(2, '0');
-
-                if (isSystem) {
-                    return `
-                        <div style="text-align: center; color: #999; font-size: 11px; margin: 10px 0;">
-                            <em>${msg.text}</em>
-                        </div>
-                    `;
-                }
 
                 return `
                     <div class="message ${isOwn ? 'own' : 'other'}">
@@ -546,15 +687,48 @@
                 `;
             }).join('');
 
-            // Scroll to bottom
+            // Show typing indicator
+            if (typingUsers[currentGroup].size > 0) {
+                const typingList = Array.from(typingUsers[currentGroup])
+                    .filter(u => u !== currentUser)
+                    .join(', ');
+                
+                if (typingList) {
+                    messagesContainer.innerHTML += `
+                        <div class="typing-indicator">
+                            ${typingList} is typing
+                            <span></span><span></span><span></span>
+                        </div>
+                    `;
+                }
+            }
+
+            // Auto-scroll to bottom
             setTimeout(() => {
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
             }, 10);
         }
 
+        // ============= TYPING INDICATORS =============
+        function handleTyping() {
+            // Add user to typing set
+            typingUsers[currentGroup].add(currentUser);
+            loadMessages();
+
+            // Clear existing timeout
+            clearTimeout(typingTimeout);
+
+            // Set new timeout to remove typing indicator
+            typingTimeout = setTimeout(() => {
+                typingUsers[currentGroup].delete(currentUser);
+                loadMessages();
+            }, 2000);
+        }
+
+        // ============= USER MANAGEMENT =============
         function updateMembersList() {
             const membersList = document.getElementById('membersList');
-            const members = onlineUsers[currentGroup];
+            const members = Array.from(onlineUsers[currentGroup]);
 
             if (members.length === 0) {
                 membersList.innerHTML = '<div class="user-tag">No one online</div>';
@@ -566,39 +740,57 @@
             ).join('');
         }
 
+        // ============= EVENT HANDLERS =============
         function handleKeyPress(event) {
-            if (event.key === 'Enter') {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
                 sendMessage();
             }
         }
 
-        function exitGroup() {
-            // Remove user from online list
-            onlineUsers[currentGroup] = onlineUsers[currentGroup].filter(u => u !== currentUser);
-
-            // Add leave message
-            addSystemMessage(currentUser + ' left the group 👋');
-
-            // Go back to welcome
-            document.getElementById('chatScreen').classList.remove('active');
-            document.getElementById('welcomeScreen').classList.add('active');
-
-            // Clear inputs
-            document.getElementById('userName').value = '';
-            document.getElementById('groupSelect').value = '';
-            document.getElementById('messageInput').value = '';
-
-            currentUser = '';
-            currentGroup = '';
+        // ============= LOCAL STORAGE =============
+        function saveToLocalStorage() {
+            try {
+                const dataToSave = {};
+                Object.keys(allMessages).forEach(group => {
+                    dataToSave[group] = allMessages[group];
+                });
+                localStorage.setItem('chatMessages', JSON.stringify(dataToSave));
+            } catch (e) {
+                console.warn('Failed to save to localStorage:', e);
+            }
         }
 
-        // Simulate real-time updates
+        function loadFromLocalStorage() {
+            try {
+                const saved = localStorage.getItem('chatMessages');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    Object.keys(data).forEach(group => {
+                        if (allMessages[group]) {
+                            allMessages[group] = data[group].map(msg => ({
+                                ...msg,
+                                time: new Date(msg.time)
+                            }));
+                        }
+                    });
+                }
+            } catch (e) {
+                console.warn('Failed to load from localStorage:', e);
+            }
+        }
+
+        // ============= INITIALIZATION =============
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFromLocalStorage();
+        });
+
+        // Periodic UI updates (every 1 second instead of 500ms for better performance)
         setInterval(() => {
             if (currentGroup) {
                 updateMembersList();
-                loadMessages();
             }
-        }, 500);
+        }, 1000);
     </script>
 </body>
 </html>
